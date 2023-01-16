@@ -8,7 +8,6 @@ const listContacts = async() => {
     try {
         const contacts = await fs.readFile(contactsPath);
         const contactsParsed = JSON.parse(contacts);
-        console.log('contactsParsed', contactsParsed);
         return contactsParsed;
     } catch (error) {
         console.log(error.message);
@@ -18,10 +17,9 @@ const listContacts = async() => {
 const getContactById = async(contactId) => {
     try {
         const allContacts = await listContacts();
-        const findedContact = allContacts.find(({ id }) => Number(id) === contactId);
+        const findedContact = allContacts.find(({ id }) => id === String(contactId));
         
         if (!findedContact) return null;
-        console.log('findedContact-', findedContact);
         
         return findedContact;
     } catch (error) {
@@ -32,7 +30,7 @@ const getContactById = async(contactId) => {
 const addContact = async(name, email, phone) => {
     const newContact = {
         id: uuid.v4(),
-        name,
+        name, 
         email,
         phone,
     };
@@ -40,9 +38,9 @@ const addContact = async(name, email, phone) => {
     try {
         const allContacts = await listContacts();
         allContacts.push(newContact);
+        await fs.writeFile(contactsPath, JSON.stringify(allContacts));
 
-        const newContacts = await fs.writeFile(contactsPath, JSON.stringify(allContacts));
-        return newContacts;
+        return newContact;
     } catch (error) {
         console.log(error.message);
     }
@@ -51,7 +49,7 @@ const addContact = async(name, email, phone) => {
 const removeContact = async(contactId) => {
     try {
         const allContacts = await listContacts();
-        const index = allContacts.findIndex(({ id }) => Number(id) === contactId);
+        const index = allContacts.findIndex(({ id }) => id === String(contactId));
 
         if (index === -1) {
            console.log(`Contacts with index ${index} was not found`);
@@ -59,7 +57,6 @@ const removeContact = async(contactId) => {
         }
 
         const deleteContact = allContacts.splice(index, 1);
-        console.log('deleteContact-', deleteContact);
         await fs.writeFile(contactsPath, JSON.stringify(allContacts));
         return deleteContact;
     } catch (error) {
